@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>채팅 클라이언트</title>
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+	var chat_id = '';
+	var socket = null;
+	$(document).ready(function(){
+		socket = io.connect();
+		
+		// 브라우저 임의 종료 처리
+		$(window).unload(function(){
+			chat_out();
+		});
+		
+		socket.on('chat_join',function(data){
+			data = JSON.parse(data);
+			$('#chat_user_list').empty();
+			for(var i=0; i<data.length; i++){
+				var user_id = data[i];
+				if(user_id == chat_id){
+					$('#chat_user_list').append('<li><strong>'+user_id+'(me)</strong></li>');
+					$('#chat_id').attr('disabled',true);
+				} else {
+					$('#chat_user_list').append('<li>'+user_id+'</li>');
+				}
+			}
+			$('#now_user_cnt').html(data.length);
+		});
+		socket.on('chat_fail',function(data){
+			data = JSON.parse(data);
+			alert(data+'님은 이미 접속된 ID입니다.');
+		});
+		socket.on('someone_leaved',function(data){
+			data = JSON.parse(data);
+			$('#chat_user_list').empty();
+			for(var i=0; i<data.length; i++){
+				var user_id = data[i];
+				if(user_id == chat_id){
+					$('#chat_user_list').append('<li><strong>'+user_id+'(me)</strong></li>');
+				} else {
+					$('#chat_user_list').append('<li>'+user_id+'</li>');
+				}
+			}
+			$('#now_user_cnt').html(data.length);
+		});
+		socket.on('message_go',function(data){
+			data = decodeURIComponent(data);
+			data = JSON.parse(data);
+			console.log(data);
+			if(data.length == undefined){
+				data = [data];
+			}
+			for(var i = 0; i<data.length;i++){
+				var msg = data[i].message;
+				msg = msg.replace(/&/g,'&amp;');
+				msg = msg.replace(/\"/g,'&quot;');
+				msg = msg.replace(/\'/g,'&#39');
+				msg = msg.replace(/</g,'&lt;');
+				msg = msg.replace(/>/g,'&gt;');
+				$('#chat_list').append('<li>'+msg+'</li>');
+			}
+		});
+		socket.on('logs',function(data){
+			console.log('data',data);
+			data = JSON.parse(data);
+			$('#chat_logs').empty();
+			for(var i=0; i<data.length;i++){
+				$('#chat_logs').append('<li>'+data[i].log+'('+data[i].date+')</li>');
+			}
+		});
+		var convert = function(data){
+			data = decodeURIComponent(data);
+			data = data.replace(/&/g,'&amp;');
+			data = data.replace(/\"/g,'&quot;');
+			data = data.replace(/\'/g,'&#39');
+			data = data.replace(/</g,'&lt;');
+			data = data.replace(/>/g,'&gt;');
+			return data;
+		}
+		socket.on('view_chat',function(data){
+			data = JSON.parse(data);
+			console.log('data',data);
+			$('#chat_last').append('<li>지나간 이야기</li>');
+			for(var i=0;i<data.length;i++){
+				$('#chat_last').append('<li>'+convert(data[i].user_id)+':'+convert(data[i].msg)+'</li>');
+			}
+		});
+	});
+	
+	function chat_in(){
+		socket.emit('chat_conn',JSON.stringify({chat_id:chat_id}));
+		$('#chat_list').html('');
+	}
+	function connection(){
+		chat_id = $('#chat_id').val();
+		if(chat_id==''||chat_id == 'ID 입력'){
+			alert('ID를 입력해주세요');
+		} else {
+			chat_in();
+			$('#chat_form_no').slideUp();
+			$('#chat_form').slideDown();
+		}
+	}
+	function chat_input(){
+		var encodedMsg = encodeURIComponent($('#chat_input').val());
+		socket.emit('message', JSON.stringify({chat_id:chat_id,message:encodedMsg}));
+		$('#chat_input').val('');
+	}
+	function chat_out(){
+		socket.emit('leave', JSON.stringify({chat_id:chat_id}));
+		$('#chat_id').attr('disabled',false);
+		$('#chat_id').val('ID 입력');
+		$('#chat_list').html('');
+		$('#chat_form').slideUp();
+		$('#chat_form_no').slideDown();
+		chat_id = '';
+		//socket.close();	//disconnect 이벤트 발생
+	}
+</script>
+</head>
+<body>
+	<div id="contents">
+		<h1>채팅방</h1>
+		<div class="chat_content">
+			<div class="chat_login"><!-- 로그인 영역 -->
+				<input type="text" id="chat_id" value="ID 입력" onclick="$(this).val('');"/>
+				&nbsp;&nbsp;<a href="javascript:connection();">접속하기</a>
+				<strong>현재접속자수</strong> : <span id="now_user_cnt">-</span>
+			</div>
+			<div id="chat_form_no">ID 입력 후 접속해주세요.</div>
+			<div id="chat_form" style="display:none;"><!-- 채팅창 영역 -->
+				<ul id="chat_last"></ul>
+				<ul id="chat_list"></ul>
+				<ul id="chat_user_list"></ul>
+				<div class="chat_input">
+					<input type="text" id="chat_input" value="대화글을 입력하세요" onclick="$(this).val('');"/>
+					<a href="javascript:chat_input();">입력</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="javascript:chat_out();">나가기</a>
+				</div>
+			</div>
+			<div class="chat_history"><ul id="chat_logs"></ul></div><!-- 접속로그영역 -->
+		</div>
+	</div>
+</body>
+</html>

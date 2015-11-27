@@ -1,0 +1,32 @@
+extends layout
+
+block content
+  h1= title
+  ul
+    each item in items
+      li 
+        a(href="/movies/"+item) #{item}
+        form(method="POST" action="/movies/"+item)
+          input(type="hidden" name="_method" value="delete")
+          input(type="submit" value="delete")
+  p
+  form(method="POST" action="/movies")
+    input(type="hidden" name="_method" value="delete")
+    input(type="submit" value="delete all")
+  p
+  form(method="POST" action="/movies")
+    p Movie title:
+      input(type="text" name="title")
+    p Movie director:
+      input(type="text" name="director")
+    p Movie actor:
+      input(type="text" name="actor")
+    p
+      input(type="submit" value="add")
+  p
+  form(method="POST" action="/movies")
+    input(type="hidden" name="_method" value="put")
+    p Movie List (JSON style):
+      input(type="text" name="movies")
+    p
+      input(type="submit" value="movie list update")

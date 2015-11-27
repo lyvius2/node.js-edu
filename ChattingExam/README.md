@@ -2,7 +2,8 @@
 
 # ChattingExam
 
-
+MongoDB와 Redis를 활용한 채팅 프로그램
+[Redis Download](https://github.com/dmajkic/redis/downloads)
 
 ## Usage
 

@@ -1,0 +1,10 @@
+extends layout
+
+block content
+  h1= title
+  ul
+  each item in movies
+    li
+      a(href='/movies/'+item.movie_id) #{item.title}
+  br
+  a(href='/movies/add') Add Movie

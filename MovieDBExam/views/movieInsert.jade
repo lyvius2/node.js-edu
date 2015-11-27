@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1= title
+  form(method='POST' action='/movies/add')
+    p 영화제목:
+      input(type='text' name='title')
+    p 영화감독:
+      input(type='text' name='director')
+    p 제작연도:
+      input(type='number' name='year')
+    p 영화 줄거리:
+      textarea(cols='50' rows='10' name='synopsis')
+    p
+      input(type='submit' value='등록')

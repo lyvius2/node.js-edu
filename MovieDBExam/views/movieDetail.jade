@@ -1,0 +1,28 @@
+extends layout
+
+block content
+  h1= movie.title
+  h2 감독: #{movie.director}
+  h2 연도: #{movie.year}
+  h2 줄거리: #{movie.synopsis}
+  p
+  h1 한줄평
+  ul
+    each comment in movie.comments
+      li #{comment.comment}
+        form(method='POST' action='/movies/comment')
+          input(type='hidden' name='_method' value='delete')
+          input(type='hidden' name='movie_id' value=movie.movie_id)
+          input(type='hidden' name='_id' value=comment._id)
+          input(type='submit' value='삭제하기')
+  p
+  form(method='POST' action='/movies/delete')
+    input(type='hidden' name='movie_id' value=movie.movie_id)
+    input(type='submit' value='삭제')
+  p
+  form(method='POST' action='/movies/comment')
+    input(type='text' name='comment')
+    input(type='hidden' name='movie_id' value=movie.movie_id)
+    input(type='submit' value='올리기')
+  p
+    a(href='/movies/modify/'+movie.movie_id) 수정하기

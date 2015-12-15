@@ -2,7 +2,7 @@
 
 # HttpExam
 
-http Åë½ÅÀ» ±¸ÇöÇÏ´Â ÄÚµå.
+http ì„œë¹„ìŠ¤ë¥¼ êµ¬í˜„í•œ ì˜ˆì œ
 
 ## Usage
 

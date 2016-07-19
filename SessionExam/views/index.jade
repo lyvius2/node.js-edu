@@ -1,0 +1,8 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  p Visit Count #{sessionInfo.visit}
+  p start : #{sessionInfo.startDate}
+  p end : #{sessionInfo.finalDate}
